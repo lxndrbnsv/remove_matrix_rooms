@@ -1,4 +1,4 @@
-__idea__/
+.idea/
 venv/
 __pycache__/
 COPY_*
