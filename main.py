@@ -24,7 +24,7 @@ def get_rooms_list():
     cursor = connection.cursor()
     try:
         cursor.execute(
-            """SELECT room_id FROM rooms;""",
+            """SELECT room_id FROM rooms WHERE creator = '@ai_bot:m.mybusines.app';""",
             )
 
         select_data = cursor.fetchall()
@@ -38,12 +38,31 @@ def get_rooms_list():
         if connection:
             cursor.close()
             connection.close()
+    print(room_list)
     return room_list
 
 
-def delete_room(room_id, admin_token):
-    url = f"https://test.matrix.mybusines.app/_synapse/admin/v1/rooms/{room_id}"
-    auth_header = {"Authorization": f"Bearer {admin_token}"}
+def parse_logs():
+    r_id = []
+
+    with open("./logs_to_parse.log", "r") as text_file:
+        lines = text_file.readlines()
+
+    for l in lines:
+        if "'room_id':" in l:
+            room_dict = json.loads(l.replace("'", '"'))
+            r_id.append(room_dict["room_id"])
+            print(l)
+
+    for r in r_id:
+        print(r)
+
+    return r_id
+
+
+def delete_room(room_id):
+    url = f"https://matrix.m.mybusines.app/_synapse/admin/v1/rooms/{room_id}"
+    auth_header = {"Authorization": "Bearer syt_YWlfYm90_SGufehDudUJijauIsTeY_4GlBjJ"}
     data = dict(force_purge=True)
     r = requests.delete(url, headers=auth_header, json=data)
     print(
@@ -56,5 +75,5 @@ def delete_room(room_id, admin_token):
 if __name__ == '__main__':
     rooms = get_rooms_list()
     for room in rooms:
-        delete_room(room, CONFIG["admin_token"])
+        delete_room(room)
 
