@@ -42,6 +42,33 @@ def get_rooms_list():
     return room_list
 
 
+def get_admin_token():
+    connection = psycopg2.connect(
+        user=CONFIG["database_user"],
+        password=CONFIG["database_password"],
+        host=CONFIG["database_host"],
+        database=CONFIG["database_name"],
+    )
+
+    cursor = connection.cursor()
+    try:
+        cursor.execute(
+            """SELECT token FROM access_tokens WHERE user_id = '%s';""",
+            CONFIG["bot_id"]
+        )
+
+        select_data = cursor.fetchone()
+
+    except (Exception, psycopg2.Error) as error:
+        traceback.print_exc()
+        print(error, flush=True)
+    finally:
+        if connection:
+            cursor.close()
+            connection.close()
+    return select_data[0]
+
+
 def parse_logs():
     r_id = []
 
@@ -61,8 +88,8 @@ def parse_logs():
 
 
 def delete_room(room_id):
-    url = f"https://matrix.m.mybusines.app/_synapse/admin/v1/rooms/{room_id}"
-    auth_header = {"Authorization": "Bearer syt_YWlfYm90_SGufehDudUJijauIsTeY_4GlBjJ"}
+    url = f"https://matrix.m.qaim.me/_synapse/admin/v1/rooms/{room_id}"
+    auth_header = {"Authorization": f"Bearer {get_admin_token()}"}
     data = dict(force_purge=True)
     r = requests.delete(url, headers=auth_header, json=data)
     print(
