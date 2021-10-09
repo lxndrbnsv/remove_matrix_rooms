@@ -24,8 +24,8 @@ def get_rooms_list():
     cursor = connection.cursor()
     try:
         cursor.execute(
-            """SELECT room_id FROM rooms WHERE creator = '%s';""",
-            CONFIG['bot_id']
+            """SELECT room_id FROM rooms WHERE creator = %s;""",
+            [CONFIG['bot_id']]
             )
 
         select_data = cursor.fetchall()
@@ -54,8 +54,8 @@ def get_admin_token():
     cursor = connection.cursor()
     try:
         cursor.execute(
-            """SELECT token FROM access_tokens WHERE user_id = '%s';""",
-            CONFIG["bot_id"]
+            """SELECT token FROM access_tokens WHERE user_id = %s;""",
+            [CONFIG["bot_id"]]
         )
 
         select_data = cursor.fetchone()
