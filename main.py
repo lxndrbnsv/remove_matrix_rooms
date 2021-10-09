@@ -24,7 +24,8 @@ def get_rooms_list():
     cursor = connection.cursor()
     try:
         cursor.execute(
-            """SELECT room_id FROM rooms WHERE creator = '@ai_bot:m.mybusines.app';""",
+            """SELECT room_id FROM rooms WHERE creator = '%s';""",
+            CONFIG['bot_id']
             )
 
         select_data = cursor.fetchall()
@@ -69,6 +70,23 @@ def get_admin_token():
     return select_data[0]
 
 
+def login():
+    bot_id = CONFIG["bot_id"]
+    login_url = f"{CONFIG['matrix_api_url']}/_matrix/client/r0/login"
+    data = dict(
+        type="m.login.password",
+        identifier=dict(
+            type="m.id.user",
+            user="test_bot"
+        ),
+        password="test",
+        initial_device_display_name="QN API"
+    )
+    r = requests.post(login_url, json=data)
+
+    return r.text
+
+
 def parse_logs():
     r_id = []
 
@@ -88,7 +106,7 @@ def parse_logs():
 
 
 def delete_room(room_id):
-    url = f"https://matrix.m.qaim.me/_synapse/admin/v1/rooms/{room_id}"
+    url = f"{CONFIG['matrix_api_url']}/_synapse/admin/v1/rooms/{room_id}"
     auth_header = {"Authorization": f"Bearer {get_admin_token()}"}
     data = dict(force_purge=True)
     r = requests.delete(url, headers=auth_header, json=data)
@@ -100,7 +118,8 @@ def delete_room(room_id):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    rooms = get_rooms_list()
-    for room in rooms:
-        delete_room(room)
+    print(login())
+    # rooms = get_rooms_list()
+    # for room in rooms:
+    #     delete_room(room)
 
