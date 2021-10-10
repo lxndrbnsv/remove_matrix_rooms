@@ -77,14 +77,14 @@ def login():
         type="m.login.password",
         identifier=dict(
             type="m.id.user",
-            user="test_bot"
+            user=bot_id
         ),
-        password="test",
+        password=CONFIG["bot_password"],
         initial_device_display_name="QN API"
     )
     r = requests.post(login_url, json=data)
 
-    return r.text
+    return json.loads(r.text)["access_token"]
 
 
 def parse_logs():
@@ -107,7 +107,7 @@ def parse_logs():
 
 def delete_room(room_id):
     url = f"{CONFIG['matrix_api_url']}/_synapse/admin/v1/rooms/{room_id}"
-    auth_header = {"Authorization": f"Bearer {get_admin_token()}"}
+    auth_header = {"Authorization": f"Bearer {admin_token}"}
     data = dict(force_purge=True)
     r = requests.delete(url, headers=auth_header, json=data)
     print(
@@ -118,8 +118,8 @@ def delete_room(room_id):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print(login())
-    # rooms = get_rooms_list()
-    # for room in rooms:
-    #     delete_room(room)
+    admin_token = login()
+    rooms = get_rooms_list()
+    for room in rooms:
+        delete_room(room)
 
